@@ -36,7 +36,7 @@ public class Value {
     private ValueCallback callback;
 
     /**
-     * 使用一次就加一
+     * 使用一次就加一，因为页面可能加载同一张图片很多次
      */
     public void useAction(){
         Tool.checkNotEmpty(bitmap);
