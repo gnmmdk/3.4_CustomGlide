@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 活动缓存--真正被使用的资源
+ * todo B 活动缓存--真正被使用的资源
  */
 public class ActivityCache {
     //容器
@@ -30,21 +30,21 @@ public class ActivityCache {
     }
 
     /**
-     * 添加活动缓存
+     * todo B.1 添加活动缓存
      * @param key
      * @param value
      */
     public void put(String key,Value value){
         Tool.checkNotEmpty(key);
 
-        // 绑定Value的监听 --> Value发起来的（Value没有被使用了，就会发起这个监听，给外界业务需要来使用）
+        // todo B.1.1 绑定Value的监听 --> Value发起来的（Value没有被使用了，就会发起这个监听，给外界业务需要来使用）
         value.setCallback(valueCallback);
-
+        // todo B.1.2 CustomWeakReference 为了监听这个弱引用是否被回收了
         mapList.put(key,new CustomWeakReference(value,getQueue(),key));
     }
 
     /**
-     * 给外界获取Value
+     * todo B.2 给外界获取Value
      * @param key
      * @return
      */
@@ -57,7 +57,7 @@ public class ActivityCache {
     }
 
     /**
-     * 手动移除 TODO getQueue线程 queue.remove()阻塞的问题
+     * todo B.3 手动移除 getQueue线程 queue.remove()阻塞的问题
      * @param key
      * @return
      */
@@ -72,7 +72,7 @@ public class ActivityCache {
     }
 
     /**
-     * TODO 释放 关闭线程
+     * todo B.4 释放 关闭线程
      */
     public void closeThread() {
         isCloseThread = true;
@@ -104,7 +104,7 @@ public class ActivityCache {
     }
 
     /**
-     * 为了监听弱引用被回收，被动移除
+     * todo B.1.3为了监听弱引用被回收，被动移除
      * @return
      */
     private ReferenceQueue<Value> getQueue(){

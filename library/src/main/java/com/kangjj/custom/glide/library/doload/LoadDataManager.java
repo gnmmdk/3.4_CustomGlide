@@ -76,7 +76,7 @@ public class LoadDataManager implements ILoadData,Runnable {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        Value value = Value.getInstance();//TODO 单例
+                        Value value = Value.getInstance();//TODO? 单例
                         value.setBitmap(bitmap);
                         //回调成功
                         responseCallback.responseSuccess(value);

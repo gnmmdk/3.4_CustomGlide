@@ -15,7 +15,7 @@ import com.kangjj.custom.glide.library.fragment.ActivityFragmentManageer;
 import com.kangjj.custom.glide.library.fragment.FragmentActivityFragmentManageer;
 
 /**
- * @Description:
+ * @Description: todo E 生命周期 可以管理的生命周期：FragmentActivity Activity。不可管理的生命周期： Context
  * @Author: jj.kang
  * @Email: jj.kang@zkteco.com
  * @ProjectName: 3.4_CustomGlide
@@ -48,7 +48,7 @@ public class RequestManager {
     });
 
     /**
-     * 可以管理生命周期 - FragmentActivity是有生命周期方法的（fragment)
+     * todo E.1 可以管理生命周期 - FragmentActivity是有生命周期方法的（fragment)
      * @param fragmentActivity
      */
     public RequestManager(FragmentActivity fragmentActivity) {
@@ -56,15 +56,18 @@ public class RequestManager {
         FragmentManager supportFragmentManager = fragmentActivity.getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentByTag(FRAGMENT_ACTIVITY_NAME);
         if(fragment == null){
+            //todo E.1.1 该类继承对应的Fragment（V4包 Fragment）实现 LifecycleCallback
             fragment = new FragmentActivityFragmentManageer(requestTargetEngine); // Fragment的生命周期与requestTargetEngine关联起来了
             supportFragmentManager.beginTransaction().add(fragment,FRAGMENT_ACTIVITY_NAME).commitAllowingStateLoss();
         }
+
+        //todo E.1.2 Android基于Handler消息的，为了让我们的fragment，不要再排队中，为了下次可以取出来
         mHandler.sendEmptyMessage(NEXT_HANDLER_MSG);
 
     }
 
     /**
-     * 可以管理生命周期 -- Activity是有生命周期方法的(Fragment)
+     * todo E.2 可以管理生命周期 -- Activity是有生命周期方法的(Fragment)
      * @param activity
      */
     public RequestManager(Activity activity) {
@@ -72,13 +75,14 @@ public class RequestManager {
         android.app.FragmentManager fragmentManager = activity.getFragmentManager();
         android.app.Fragment fragment = fragmentManager.findFragmentByTag(ACTIVITY_NAME);
         if(fragment == null){
+            //todo E.2.1 该类继承对应的Fragment（app Fragment）实现 LifecycleCallback
             fragment = new ActivityFragmentManageer(requestTargetEngine);// Fragment的生命周期与requestTargetEngine关联起来了
             // 添加到管理器 -- fragmentManager.beginTransaction().add.. Handler
             fragmentManager.beginTransaction().add(fragment,ACTIVITY_NAME).commitAllowingStateLoss();
         }
 //        android.app.Fragment fragment2 = fragmentManager.findFragmentByTag(ACTIVITY_NAME);
 //        Log.d(TAG, "RequestManager: fragment2" + fragment2); // null ： @3 还在排队中，还没有消费
-
+        //todo E.2.2 Android基于Handler消息的，为了让我们的fragment，不要再排队中，为了下次可以取出来
         mHandler.sendEmptyMessage(NEXT_HANDLER_MSG);
     }
 

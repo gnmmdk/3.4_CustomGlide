@@ -10,7 +10,7 @@ import androidx.collection.LruCache;
 import com.kangjj.custom.glide.library.resource.Value;
 
 /**
- * @Description: 内存缓存--LRU算法
+ * @Description: todo C 内存缓存--LRU算法  LRU算法: ---> 最近没有使用的元素，会自动被移除掉
  * @Author: jj.kang
  * @Email: jj.kang@zkteco.com
  * @ProjectName: 3.4_CustomGlide
@@ -23,6 +23,7 @@ public class MemoryCache extends LruCache<String, Value> {
     private MemoryCacheCallback memoryCacheCallback;
 
     /**
+     * todo 利用LinkedHashMap<K, V>，LinkedHashMap: accessOrder:true==拥有访问排序的功能 (最少使用元素算法-LRU算法)
      * @param maxSize for caches that do not override {@link #sizeOf}, this is
      *                the maximum number of entries in the cache. For all other caches,
      *                this is the maximum sum of the sizes of the entries in this cache.
@@ -37,7 +38,7 @@ public class MemoryCache extends LruCache<String, Value> {
         shoudonRemove = false;
         return value;
     }
-
+    //todo C.1  API 12:bitmap.getByteCount() API 19:bitmap.getAllocationByteCount()
     @Override
     protected int sizeOf(@NonNull String key, @NonNull Value value) {
         Bitmap bitmap = value.getBitmap();
@@ -56,6 +57,7 @@ public class MemoryCache extends LruCache<String, Value> {
     }
 
     /**
+     * //todo C.2 entryRemoved 最少使用的元素会被移除
      * 1 重复的key
      * 2 最少使用的元素会被移除
      * 上方 public Value shoudonRemove(String key)方法里面remove方法，最终要调用到entryRemoved，所以要要加shoudonRemove判断

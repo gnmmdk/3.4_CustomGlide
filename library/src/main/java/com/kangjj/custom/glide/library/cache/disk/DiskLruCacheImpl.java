@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * @Description: 磁盘缓存的封装
+ * @Description: todo D 磁盘缓存的封装 对DiskLruCache的封装
  * @Author: jj.kang
  * @Email: jj.kang@zkteco.com
  * @ProjectName: 3.4_CustomGlide
@@ -44,17 +44,17 @@ public class DiskLruCacheImpl {
             e.printStackTrace();
         }
     }
-
+    //todo D.1 存放Bitmap
     public void put(String key,Value value){
         Tool.checkNotEmpty(key);
         DiskLruCache.Editor editor = null;
         OutputStream outputStream = null;
         try {
-            editor = diskLruCache.edit(key);
-            outputStream = editor.newOutputStream(0);// index 不能大于 VALUE_COUNT
+            editor = diskLruCache.edit(key);//todo D.1.1
+            outputStream = editor.newOutputStream(0);// index 不能大于 VALUE_COUNT //todo D.1.2
 
             Bitmap bitmap = value.getBitmap();
-            bitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream);// 把bitmap写入到outputStream
+            bitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream);// 把bitmap写入到outputStream //todo D.1.3
             outputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -82,16 +82,16 @@ public class DiskLruCacheImpl {
             }
         }
     }
-
+    //todo D.2 取出Bitmap
     public Value get(String key){
         Tool.checkNotEmpty(key);
         InputStream inputStream = null;
         try {
-            DiskLruCache.Snapshot snapshot = diskLruCache.get(key);
+            DiskLruCache.Snapshot snapshot = diskLruCache.get(key);//todo D.2.1
             if( null != snapshot){
                 Value value = Value.getInstance();//TODO 为什么是单例？
-                inputStream = snapshot.getInputStream(0);// index 不能大于 VALUE_COUNT
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                inputStream = snapshot.getInputStream(0);// index 不能大于 VALUE_COUNT //todo D.2.2
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);//todo D.2.3
                 value.setBitmap(bitmap);
                 value.setKey(key);
                 return value;

@@ -17,7 +17,7 @@ import com.kangjj.custom.glide.library.resource.Value;
 import com.kangjj.custom.glide.library.resource.ValueCallback;
 
 /**
- * @Description: 加载图片资源
+ * @Description: todo F 加载图片资源
  * @Author: jj.kang
  * @Email: jj.kang@zkteco.com
  * @ProjectName: 3.4_CustomGlide
@@ -63,9 +63,9 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
     public void glideRecycleAction() {
         Log.d(TAG, "glideInitAction: Glide生命周期之 进行释放操作 缓存策略释放操作等 >>>>>> ....");
         if(activityCache != null){
-            activityCache.closeThread();       //把活动缓存给释放掉 TODO 是否需要加入到内存缓存中？
+            activityCache.closeThread();        //todo E.3 把活动缓存给释放掉
         }
-        //把内存缓存移除 这点没必要
+        //是否需要加入到内存缓存中？ 把内存缓存移除 这点没必要
     }
 
     public void loadValueInitAction(String path, Context glideContext) {
@@ -79,7 +79,7 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
         Tool.assertMainThread();
         this.imageView = imageView;
 
-        //加载资源 --> 缓存 --> 网络/SD/加载资源 成功后-->资源保存在缓存中 >>>
+        //todo F 加载资源 --> 缓存 --> 网络/SD/加载资源 成功后-->资源保存在缓存中 >>>
         Value value = cancheAction();
         if(value != null){
             imageView.setImageBitmap(value.getBitmap());
@@ -94,7 +94,7 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
      * @return
      */
     private Value cancheAction() {
-        //第一步，判断活动缓存是否有资源，如果有资源 就返回， 否则就继续往下找
+        //todo F.1 第一步，判断活动缓存是否有资源，如果有资源 就返回， 否则就继续往下找
         Value value = activityCache.get(key);
         if(value != null){
             Log.d(TAG, "cacheAction: 本次加载是在(活动缓存)中获取的资源>>>");
@@ -102,7 +102,7 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
             value.useAction();//使用了一次加一
             return value;  // 返回 代表 使用了一次 Value
         }
-        //第二步，从内存缓存中去找，如果找到了，内存缓存中的元素 “移动” 到 活动缓存， 然后再返回
+        //todo F.2 第二步，从内存缓存中去找，如果找到了，内存缓存中的元素 “移动” 到 活动缓存， 然后再返回
         value = memoryCache.get(key);
         if(value != null){
             memoryCache.shoudonRemove(key);//手动移除，不会调用到entryRemovedMemoryCache
@@ -113,7 +113,7 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
             return value;  // 返回 代表 使用了一次 Value
         }
 
-        //第三步，从磁盘缓存中去找，如果找到了，把磁盘缓存中的元素 加入到 活动缓存中
+        //todo F.3 第三步，从磁盘缓存中去找，如果找到了，把磁盘缓存中的元素 加入到 活动缓存中
         value = diskLruCache.get(key);
         if(value != null){
             // 把磁盘缓存中的元素 --> 加入到活动缓存中
@@ -124,14 +124,14 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
             value.useAction();
             return value;
         }
-        //第四步，真正的去加载外部资源了， 去网络上加载/去SD本地上加载
+        //todo F.4 第四步，真正的去加载外部资源了， 去网络上加载/去SD本地上加载
         value = new LoadDataManager().loadResource(glideContext,path,this);
 
         return value;//加载网络的话 这里会返回空
     }
 
     /**
-     * 保存到缓存中
+     * todo F.5 通过接口的回到 保存到缓存中
      * @param key
      * @param value
      */
@@ -150,7 +150,7 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
 
     /**
      * 活动缓存间接的调用Value所发出的
-     * 回调高速外界，Value资源不再使用了
+     * 回调告诉外界，Value资源不再使用了
      * 监听的方法（Value不再使用）
      * @param key
      * @param value

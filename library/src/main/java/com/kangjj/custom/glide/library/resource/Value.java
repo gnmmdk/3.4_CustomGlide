@@ -6,13 +6,13 @@ import android.util.Log;
 import com.kangjj.custom.glide.library.Tool;
 
 /**
- *  对Bitmap的封装
+ *  todo A.2 对Bitmap的封装
  */
 public class Value {
     private final String TAG = Value.class.getSimpleName();
 
     private static Value value;
-
+    //todo？ 为何用单例
     public static Value getInstance(){
         if(value==null){
             synchronized (Value.class){
@@ -36,7 +36,7 @@ public class Value {
     private ValueCallback callback;
 
     /**
-     * 使用一次就加一，因为页面可能加载同一张图片很多次
+     * todo A.2.1 使用一次就加一，因为页面可能加载同一张图片很多次
      */
     public void useAction(){
         Tool.checkNotEmpty(bitmap);
@@ -49,19 +49,19 @@ public class Value {
     }
 
     /**
-     * 使用完成（不使用） 就 减一
+     * todo A.2.2 使用完成（不使用） 就 减一
      * count 小于0 不再使用
      */
     public void nonUseAction(){
         count--;
-        if(count<=0 && callback!=null){
+        if(count<=0 && callback!=null){//todo A.2.3 小于0的时候通知外部
             callback.valueNonUseListener(key,this);
         }
         Log.d(TAG, "useAction: 减一 count:" + count);
     }
 
     /**
-     * 释放
+     * todo A.3 释放Bitmap
      */
     public void recycleBitmap(){
         if (count > 0) {

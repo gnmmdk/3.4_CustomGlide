@@ -3,6 +3,7 @@ package com.kangjj.custom.glide.library.resource;
 import com.kangjj.custom.glide.library.Tool;
 
 /**
+ * TODO A 资源封装   A.1 key是由路径加密成sha256的字符串
  * 唯一描述
  */
 public class Key {
