@@ -12,6 +12,8 @@ import com.kangjj.custom.glide.library.cache.disk.DiskLruCacheImpl;
 import com.kangjj.custom.glide.library.doload.LoadDataManager;
 import com.kangjj.custom.glide.library.doload.ResponseCallback;
 import com.kangjj.custom.glide.library.fragment.LifecycleCallback;
+import com.kangjj.custom.glide.library.pool.BitmapPool;
+import com.kangjj.custom.glide.library.pool.BitmapPoolImpl;
 import com.kangjj.custom.glide.library.resource.Key;
 import com.kangjj.custom.glide.library.resource.Value;
 import com.kangjj.custom.glide.library.resource.ValueCallback;
@@ -34,8 +36,9 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
     private ActivityCache activityCache;            //活动缓存缓存
     private MemoryCache memoryCache;                //内存缓存
     private DiskLruCacheImpl diskLruCache;          //磁盘缓存
-                                                    //复用池 TODO
+    private BitmapPool bitmapPool;                                                //复用池 TODO
     private final int MEMORY_MAX_SIZE = 1024 * 1024 * 60;
+    private final int POOL_MAX_SIZE = 1024 * 1024 * 6;
 
     public RequestTargetEngine() {
         if(activityCache == null){
@@ -47,6 +50,10 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
         }
         //初始化磁盘缓存
         diskLruCache = new DiskLruCacheImpl();
+
+        if(bitmapPool==null) {
+            bitmapPool = new BitmapPoolImpl(POOL_MAX_SIZE);
+        }
     }
 
     @Override

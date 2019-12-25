@@ -2,6 +2,7 @@ package com.kangjj.custom.glide;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -19,6 +20,8 @@ public class MainActivity extends AppCompatActivity {
         imageView1 = findViewById(R.id.image1);
         imageView2 = findViewById(R.id.image2);
         imageView3 = findViewById(R.id.image3);
+
+        com.bumptech.glide.Glide.with(this).load(imageView1).into(imageView1);
     }
     public void t1(View view) {
         Glide.with(this).load(PATH).into(imageView1);
