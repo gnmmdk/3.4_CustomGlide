@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -336,7 +337,7 @@ public class Tool {
     /**
      * 从inputStream中获取字节流 数组大小
      **/
-    public static byte[] readStream(InputStream inStream) throws Exception {
+    public static byte[] readStream(InputStream inStream) throws IOException {
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int len = 0;

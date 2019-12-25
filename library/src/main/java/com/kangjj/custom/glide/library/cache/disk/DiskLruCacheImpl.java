@@ -34,8 +34,8 @@ public class DiskLruCacheImpl {
     private final long MAX_SIZE = 1024 * 1024 * 100; // 以后修改成 使用者可以设置的  注意：可以自己去自动配置
 
     private DiskLruCache diskLruCache;
-
-    public DiskLruCacheImpl() {
+    private PoolBitmapAlloc poolBitmapAlloc;
+    public DiskLruCacheImpl(PoolBitmapAlloc poolBitmapAlloc)  {
         File file = new File(Environment.getExternalStorageDirectory() + File.separator + DISKLRU_CACHE_DIR);
 
         try {
@@ -43,6 +43,7 @@ public class DiskLruCacheImpl {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.poolBitmapAlloc = poolBitmapAlloc;
     }
     //todo D.1 存放Bitmap
     public void put(String key,Value value){
@@ -91,10 +92,14 @@ public class DiskLruCacheImpl {
             if( null != snapshot){
                 Value value = Value.getInstance();//TODO 为什么是单例？
                 inputStream = snapshot.getInputStream(0);// index 不能大于 VALUE_COUNT //todo D.2.2
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);//todo D.2.3
-                value.setBitmap(bitmap);
-                value.setKey(key);
-                return value;
+                byte[] data = Tool.readStream(inputStream);
+                if(poolBitmapAlloc!=null){
+//                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);//todo D.2.3
+                    Bitmap bitmap = poolBitmapAlloc.getPoolBitmap(data);
+                    value.setBitmap(bitmap);
+                    value.setKey(key);
+                    return value;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -110,4 +115,9 @@ public class DiskLruCacheImpl {
         }
         return null;
     }
+
+    public interface PoolBitmapAlloc{
+        Bitmap getPoolBitmap(byte[] data);
+    }
+
 }

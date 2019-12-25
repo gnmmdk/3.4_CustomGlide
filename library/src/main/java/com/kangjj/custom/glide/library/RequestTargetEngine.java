@@ -2,6 +2,10 @@ package com.kangjj.custom.glide.library;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -18,6 +22,8 @@ import com.kangjj.custom.glide.library.resource.Key;
 import com.kangjj.custom.glide.library.resource.Value;
 import com.kangjj.custom.glide.library.resource.ValueCallback;
 
+import java.io.InputStream;
+
 /**
  * @Description: todo F 加载图片资源
  * @Author: jj.kang
@@ -26,7 +32,7 @@ import com.kangjj.custom.glide.library.resource.ValueCallback;
  * @Package: com.kangjj.custom.glide.library
  * @CreateDate: 2019/12/6 14:41
  */
-public class RequestTargetEngine implements LifecycleCallback, ValueCallback, MemoryCacheCallback, ResponseCallback {
+public class RequestTargetEngine implements LifecycleCallback, ValueCallback, MemoryCacheCallback, ResponseCallback, DiskLruCacheImpl.PoolBitmapAlloc {
     private final String TAG = RequestTargetEngine.class.getSimpleName();
     private String path;
     private Context glideContext;
@@ -36,9 +42,9 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
     private ActivityCache activityCache;            //活动缓存缓存
     private MemoryCache memoryCache;                //内存缓存
     private DiskLruCacheImpl diskLruCache;          //磁盘缓存
-    private BitmapPool bitmapPool;                                                //复用池 TODO
+    private BitmapPool bitmapPool;
     private final int MEMORY_MAX_SIZE = 1024 * 1024 * 60;
-    private final int POOL_MAX_SIZE = 1024 * 1024 * 6;
+    private final int POOL_MAX_SIZE = 1024 * 1024 * 10;
 
     public RequestTargetEngine() {
         if(activityCache == null){
@@ -48,13 +54,17 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
             memoryCache = new MemoryCache(MEMORY_MAX_SIZE);
             memoryCache.setMemoryCacheCallback(this);           //LRU 最少使用的元素会被移除 设置监听
         }
-        //初始化磁盘缓存
-        diskLruCache = new DiskLruCacheImpl();
 
         if(bitmapPool==null) {
             bitmapPool = new BitmapPoolImpl(POOL_MAX_SIZE);
         }
+
+        //初始化磁盘缓存
+        diskLruCache = new DiskLruCacheImpl(this);
+
+
     }
+
 
     @Override
     public void glideInitAction() {
@@ -166,6 +176,7 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
     public void valueNonUseListener(String key, Value value) {
         // 把活动缓存操作的Value资源 加入到 内存缓存
         if(key !=null && value!=null){
+            //todo 如果是重复的key，会被移除掉,就会调用到下方的entryRemovedMemoryCache
             memoryCache.put(key,value);
         }
     }
@@ -177,11 +188,12 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
      */
     @Override
     public void entryRemovedMemoryCache(String key, Value oldValue) {
-        // TODO 添加到复用池 ...... ，空留的功能点
+        //todo G.4 复用池使用 添加到复用池
+        //添加到复用池里面去。
+        bitmapPool.put(oldValue.getBitmap());
     }
 
 
-    @Override
     public void responseSuccess(Value value) {
         if(value!=null){
             saveCache(key,value);
@@ -189,10 +201,60 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
         }
     }
 
+    @Override
+    public void responseSuccess(byte[] data) {
+
+        final Bitmap bitmap = getBitmapPoolResult(data);
+
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Value value = Value.getInstance();//TODO? 单例
+                value.setBitmap(bitmap);
+                //回调成功
+                responseSuccess(value);
+            }
+        });
+    }
+    //todo G.3 复用池使用
+    private Bitmap getBitmapPoolResult(byte[] data){
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        //todo G.3.1 需要拿到图片的宽和高，才能到复用池里面去寻找，是否可用的内存给我复用
+        options.inJustDecodeBounds = true;//todo 只要拿到图片的周边信息 为了获取宽高
+        // 只有执行此代码后，outWidth  outHeight 才会有值
+//        BitmapFactory.decodeStream(inputStream,null,options);
+        BitmapFactory.decodeByteArray(data,0,data.length,options);
+        int width = options.outWidth;
+        int height = options.outHeight;
+
+        Bitmap bitmapPoolResult = bitmapPool.get(width,height, Bitmap.Config.ARGB_8888);
+        //todo不关心此bitmapPoolResult本身的内容（风景、美女）是什么，只关心内存是否可以为我所用。
+        //复用...
+//        BitmapFactory.Options options= new BitmapFactory.Options();
+        //只接受可以被复用的Bitmap内存
+        //todo G.3.2 证明可以复用（不开辟内存空间，不会内存抖动，内存碎片问题）
+        // options.inBitmap = bitmapPoolResult;
+
+        //todo G.3.3 无法复用，直接开辟内存空间
+        // options.inBitmap = bitmapPoolResult有问题 或者 为null;
+
+        options.inBitmap = bitmapPoolResult;
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        options.inJustDecodeBounds = false;    //默认就是false,拿到完整的信息
+        options.inMutable = true;              // 必须为true，才有复用的资格
+
+        //todo G.3.4 真正拿到Bitmap
+        return BitmapFactory.decodeByteArray(data,0,data.length,options);
+    }
 
     // 加载外部资源失败
     @Override
     public void responseException(Exception e) {
         Log.d(TAG, "responseException: 加载外部资源失败 e:" + e.getMessage());
+    }
+
+    @Override
+    public Bitmap getPoolBitmap(byte[] data) {
+        return getBitmapPoolResult(data);
     }
 }

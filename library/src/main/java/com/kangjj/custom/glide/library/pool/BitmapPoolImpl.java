@@ -8,7 +8,7 @@ import android.util.LruCache;
 import java.util.TreeMap;
 
 /**
- * @Description: 复用池的实现 ，使用LRU算法来保存
+ * @Description: todo G 复用池的实现 ，使用LRU算法来保存
  * LRU算法 移除最近最少使用
  * @Author: jj.kang
  * @Email: jj.kang@zkteco.com
@@ -19,7 +19,7 @@ import java.util.TreeMap;
 public class BitmapPoolImpl extends LruCache<Integer,Bitmap> implements BitmapPool{
     private final static String TAG = BitmapPoolImpl.class.getSimpleName();
 
-    //保存的容器，为何需要此容器，是为了get的时候，进行筛选（可以查找容器里面，和getSize一样大的，也可以比getSize大的 key）
+    //todo 保存的容器，为何需要此容器，是为了get的时候，进行筛选（可以查找容器里面，和getSize一样大的，也可以比getSize大的 key）
     private TreeMap<Integer,String> treeMap = new TreeMap<>();
 
     /**
@@ -32,21 +32,21 @@ public class BitmapPoolImpl extends LruCache<Integer,Bitmap> implements BitmapPo
 
     @Override
     public void put(Bitmap bitmap) {
-        //todo 条件一:Bitmap.isMutable = true;
+        //todo G.1.1 条件一:Bitmap.isMutable = true;
         if(!bitmap.isMutable()){
             Log.d(TAG, "put: 条件一：Bitmap.isMutable = true; 不能满足复用的机制，不能添加到复用池");
             return;
         }
-        //todo 条件二：不能大于LRU最大允许存储的容量大小
+        //todo todo G.1.2 条件二：不能大于LRU最大允许存储的容量大小
         int bitmapSize= getBitmapSize(bitmap);
         if(bitmapSize>maxSize()){
             Log.d(TAG, "put: 条件二：大于了maxSize 不能满足复用的机制，不能添加到复用池");
             return;
         }
-        //添加到复用池
+        //todo G.1.3 添加到复用池
         put(bitmapSize,bitmap);
 
-        // 第二次保存，容器
+        //todo G.1.4  第二次保存，容器
         treeMap.put(bitmapSize,null);
 
         Log.d(TAG, "put: 添加到复用池 成功....");
@@ -97,13 +97,14 @@ public class BitmapPoolImpl extends LruCache<Integer,Bitmap> implements BitmapPo
         // 开发过程中：ARGB8888  和  RGB565 徘徊
         int getSize = width * height *(config==Bitmap.Config.ARGB_8888?4:2);
 
-        //要去复用池里面寻找，是否匹配我计算出来的图片大小
-        //可以查找容器里面，和getSize一样大的，也可以比getSize大的key
+        //todo G.2.1 要去复用池里面寻找，是否匹配我计算出来的图片大小
+        //  可以查找容器里面，和getSize一样大的，也可以比getSize大的key
         Integer key = treeMap.ceilingKey(getSize);
 
         if(key == null ){
             return null;
         }
+        //todo G.2.2 复用池存在key，即容器里面有和getSize一样大或者更大的空间，返回
         Bitmap bitmapResult = remove(key);
         Log.d(TAG, "get: 从复用池 里面获取到了 Bitmap内存空间...");
         return bitmapResult;
