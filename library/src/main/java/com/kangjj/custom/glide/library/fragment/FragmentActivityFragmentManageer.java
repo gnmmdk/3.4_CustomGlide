@@ -3,7 +3,7 @@ package com.kangjj.custom.glide.library.fragment;
 import androidx.fragment.app.Fragment;
 
 /**
- * @Description:FragmentActivity关联管理
+ * @Description: FragmentActivity关联管理
  * @Author: jj.kang
  * @Email: jj.kang@zkteco.com
  * @ProjectName: 3.4_CustomGlide
