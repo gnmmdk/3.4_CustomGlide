@@ -95,7 +95,7 @@ public class DiskLruCacheImpl {
                 byte[] data = Tool.readStream(inputStream);
                 if(poolBitmapAlloc!=null){
 //                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);//todo D.2.3
-                    Bitmap bitmap = poolBitmapAlloc.getPoolBitmap(data);
+                    Bitmap bitmap = poolBitmapAlloc.getPoolBitmap(data);//todo D.2.1 use复用池
                     value.setBitmap(bitmap);
                     value.setKey(key);
                     return value;

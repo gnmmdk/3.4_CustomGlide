@@ -241,7 +241,7 @@ public class RequestTargetEngine implements LifecycleCallback, ValueCallback, Me
         options.inBitmap = bitmapPoolResult;
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         options.inJustDecodeBounds = false;    //默认就是false,拿到完整的信息
-        options.inMutable = true;              // 必须为true，才有复用的资格
+        options.inMutable = true;              // todo 必须为true，才有复用的资格
 
         //todo G.3.4 真正拿到Bitmap
         return BitmapFactory.decodeByteArray(data,0,data.length,options);
